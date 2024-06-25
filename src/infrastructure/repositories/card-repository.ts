@@ -18,11 +18,12 @@ export class CardRepository {
     async findAllByUserId(userId: number): Promise<CardDto[]> {
         const query = `
             SELECT * FROM cards
-            WHERE user_id = ${userId};
+            WHERE user_id = $1;
         `;
+        const value = [userId];
        
         try {
-            const result = await this.dinersBadPool.query(query);
+            const result = await this.dinersBadPool.query(query, value);
             const cards: CardDto[] = result.rows.map((row: { id: number; cardnumber: string; expiration_date: string; cardholdername: string; cardtype: TypesOfCard; securitycode: string; }) => {
                 const cardDto = new CardDto();
                 cardDto.id = row.id;
@@ -43,19 +44,22 @@ export class CardRepository {
     async addCardForUser(userId: number, cardDto: CardDto): Promise<CardDto> {
         const query = `
             INSERT INTO cards (user_id, cardnumber, expiration_date, cardholdername, cardtype, securitycode)
-            VALUES (
-                ${userId},
-                '${cardDto.cardNumber}',
-                '${cardDto.expirationDate}',
-                '${cardDto.cardHolderName}',
-                '${cardDto.cardType}',
-                '${cardDto.securityCode}'
-            )
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *;
         `;
+
+        const values = [
+            userId,
+            cardDto.cardNumber,
+            cardDto.expirationDate,
+            cardDto.cardHolderName,
+            cardDto.cardType,
+            cardDto.securityCode
+        ];
+
     
         try {
-            const result = await this.dinersBadPool.query(query);
+            const result = await this.dinersBadPool.query(query, values);
             const row = result.rows[0];
             const insertedCard = new CardDto();
             insertedCard.id = row.id;

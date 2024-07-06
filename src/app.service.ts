@@ -14,7 +14,7 @@ export class AppService {
 
   private async initializeDatabaseConnections() {
     try {
-      this.dinersGodPool = await connectionManager.instancePoolConnection(ConnectionType.DINERS_BAD);
+      this.dinersGodPool = await connectionManager.instancePoolConnection(ConnectionType.DINERS_GOOD);
     } catch (error) {
       console.error('Failed to initialize database connections', error);
     }

@@ -14,8 +14,9 @@ CREATE TABLE cards (
     id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
     cardNumber VARCHAR(255) NOT NULL,
-    expiration_date VARCHAR(50) NOT NULL,
+    fourDigitCardNumber VARCHAR(50) NOT NULL,
+    expiration_date VARCHAR(255) NOT NULL,
     cardHolderName VARCHAR(255) NOT NULL,
-    cardType VARCHAR(50) NOT NULL,
-    securityCode VARCHAR(50) NOT NULL
+    cardType VARCHAR(255) NOT NULL,
+    securityCode VARCHAR(255) NOT NULL
 );

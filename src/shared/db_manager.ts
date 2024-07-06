@@ -38,7 +38,7 @@ class DatabaseConnectionManager {
                   database: this.configService.get(`${database.toUpperCase()}_DB_DATABASE`),
                   host: this.configService.get(`${database.toUpperCase()}_DB_HOST`),
                   port: this.configService.get(`${database.toUpperCase()}_DB_PORT`),
-                  password: this.configService.get(`${database.toUpperCase()}_DB_PASSWORD`),
+                  password: this.configService.get(`${database}_DB_PASSWORD`),
                 }
             );
             this.connectionPools.set(databaseName, newPool);
@@ -47,8 +47,8 @@ class DatabaseConnectionManager {
     }
 
     public async instancePoolConnection(type: ConnectionType): Promise<Pool> {
-        if (type === ConnectionType.DINERS_BAD) {
-          return this.getPgConnection('DINERS_BAD');
+        if (type === ConnectionType.DINERS_GOOD) {
+          return this.getPgConnection('DINERS_GOOD');
         } else {
           throw new Error("Incorrect DB Name");
         }
@@ -57,7 +57,7 @@ class DatabaseConnectionManager {
 }
 
 export enum ConnectionType {
-    DINERS_BAD
+    DINERS_GOOD
 }
 
 export const connectionManager = DatabaseConnectionManager.getInstance();

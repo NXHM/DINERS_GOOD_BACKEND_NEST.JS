@@ -3,13 +3,13 @@ import { CardDto, TypesOfCard } from '../dto/card.dto';
 import { error } from 'console';
 
 export class CardRepository {
-    dinersBadPool : any;
+    dinersGoodPool : any;
     constructor(){
         this.initializeDatabaseConnections();
     }
     private async initializeDatabaseConnections() {
         try {
-          this.dinersBadPool = await connectionManager.instancePoolConnection(ConnectionType.DINERS_BAD);
+          this.dinersGoodPool = await connectionManager.instancePoolConnection(ConnectionType.DINERS_GOOD);
         } catch (error) {
           console.error('Failed to initialize database connections', error);
         }
@@ -23,11 +23,12 @@ export class CardRepository {
         const value = [userId];
        
         try {
-            const result = await this.dinersBadPool.query(query, value);
-            const cards: CardDto[] = result.rows.map((row: { id: number; cardnumber: string; expiration_date: string; cardholdername: string; cardtype: TypesOfCard; securitycode: string; }) => {
+            const result = await this.dinersGoodPool.query(query, value);
+            const cards: CardDto[] = result.rows.map((row: { id: number; cardnumber: string; fourdigitcardnumber: string; expiration_date: string; cardholdername: string; cardtype: TypesOfCard; securitycode: string; }) => {
                 const cardDto = new CardDto();
                 cardDto.id = row.id;
                 cardDto.cardNumber = row.cardnumber;
+                cardDto.fourDigitCardNumber = row.fourdigitcardnumber;
                 cardDto.expirationDate = row.expiration_date; 
                 cardDto.cardHolderName = row.cardholdername;
                 cardDto.cardType = row.cardtype;
@@ -43,14 +44,15 @@ export class CardRepository {
     
     async addCardForUser(userId: number, cardDto: CardDto): Promise<CardDto> {
         const query = `
-            INSERT INTO cards (user_id, cardnumber, expiration_date, cardholdername, cardtype, securitycode)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO cards (user_id, cardnumber, fourDigitCardNumber, expiration_date, cardholdername, cardtype, securitycode)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *;
         `;
 
         const values = [
             userId,
             cardDto.cardNumber,
+            cardDto.fourDigitCardNumber,
             cardDto.expirationDate,
             cardDto.cardHolderName,
             cardDto.cardType,
@@ -59,11 +61,12 @@ export class CardRepository {
 
     
         try {
-            const result = await this.dinersBadPool.query(query, values);
+            const result = await this.dinersGoodPool.query(query, values);
             const row = result.rows[0];
             const insertedCard = new CardDto();
             insertedCard.id = row.id;
             insertedCard.cardNumber = row.cardnumber;
+            insertedCard.fourDigitCardNumber = row.fourDigitCardNumber;
             insertedCard.expirationDate = row.expiration_date;
             insertedCard.cardHolderName = row.cardholdername;
             insertedCard.cardType = row.cardtype;

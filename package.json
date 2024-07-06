@@ -30,6 +30,7 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
+    "luhn": "^2.4.1",
     "passport-jwt": "^4.0.1",
     "pg": "^8.12.0",
     "reflect-metadata": "^0.2.0",

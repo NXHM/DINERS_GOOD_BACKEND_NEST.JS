@@ -5,6 +5,7 @@ import { UserRepository } from 'src/infrastructure/repositories/user-repository'
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { TypesOfCard } from 'src/infrastructure/dto/card.dto';
+const luhn = require("luhn");
 
 @Injectable()
 export class AuthService {
@@ -28,8 +29,10 @@ export class AuthService {
                 throw new Error('Not all the fields are completed');
             }
 
-            
+
+
             const validTypes = Object.values(TypesDocument);
+  
             if(!validTypes.includes(userDto.typeOfDocument.toUpperCase() as TypesDocument)){
                 throw new Error('Invalid type of document');
             } 
@@ -93,7 +96,10 @@ export class AuthService {
             if (card.securityCode.length != 3) {
                 throw new Error("Invalid security code");
             }
-    
+            /*const esValida = luhn.validate(card.cardNumber); 
+            if(esValida){
+                throw new Error("Not a valid card number");
+            }*/
         } catch(error) {
             throw new Error(error.message);
         }
@@ -109,7 +115,13 @@ export class AuthService {
             const saltOrRounds: number = 10;
             const hashPass = await bcrypt.hash(userDto.password, saltOrRounds);
             userDto.password = hashPass;
-    
+            const fourDigitCardNumber: string =  userDto.cards[0].cardNumber.slice(-4);
+            userDto.cards[0].cardNumber = await bcrypt.hash(userDto.cards[0].cardNumber, saltOrRounds);
+            userDto.cards[0].fourDigitCardNumber = fourDigitCardNumber;
+            userDto.cards[0].securityCode = await bcrypt.hash(userDto.cards[0].securityCode, saltOrRounds);
+            userDto.cards[0].expirationDate = await bcrypt.hash(userDto.cards[0].expirationDate, saltOrRounds);
+            userDto.cards[0].cardHolderName = await bcrypt.hash(userDto.cards[0].cardHolderName, saltOrRounds);
+
 
             const userResult = await this.userRepository.saveUser(userDto);
             return userResult;

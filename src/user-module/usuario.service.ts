@@ -24,11 +24,11 @@ export class UsuarioService {
             const userId = decodedToken.sub;
             const user = await this.userRepository.findUserById(userId);
             if (!user) {
-                throw new Error('Invalid user');
+                console.log('Invalid user');
             }
             return user;
         } catch (error) {
-            throw new Error('Invalid token');
+            console.log('Invalid token');
         }
     }
 
@@ -38,42 +38,42 @@ export class UsuarioService {
             const userId = decodedToken.sub;
             const user = await this.userRepository.findUserById(userId);
             if (!user) {
-                throw new Error('Invalid user');
+                console.log('Invalid user');
             }
             if (cardDto.cardNumber.length != 16) {
-                throw new Error("Invalid card number");
+                console.log("Invalid card number");
             }
 
             if (cardDto.expirationDate) {
                 let fields = cardDto.expirationDate.split('/');
                 if (fields.length !== 2) {
-                    throw new Error("Invalid Date Format: Date should be in 'month/year' format");
+                    console.log("Invalid Date Format: Date should be in 'month/year' format");
                 }
                 if (parseInt(fields[0]) > 12) {
-                    throw new Error("Invalid Date");
+                    console.log("Invalid Date");
                 }
             }
 
             if (!cardDto.cardHolderName) {
-                throw new Error("Card holder name is required");
+                console.log("Card holder name is required");
             }
 
             if (!cardDto.cardType) {
-                throw new Error("Card type is required");
+                console.log("Card type is required");
             }
 
             const validCardTypes = Object.values(TypesOfCard);
             if (!validCardTypes.includes(cardDto.cardType.toUpperCase() as TypesOfCard)) {
-                throw new Error("Invalid card type");
+                console.log("Invalid card type");
             }
 
             if (cardDto.securityCode.length != 3) {
-                throw new Error("Invalid security code");
+                console.log("Invalid security code");
             }
 
             /*const esValida = luhn.validate(cardDto.cardNumber); 
             if(esValida){
-                throw new Error("Not a valid card number");
+                console.log("Not a valid card number");
             }*/
 
             const saltOrRounds: number = 10;
@@ -89,7 +89,7 @@ export class UsuarioService {
 
         } catch (error) {
             console.error('Failed to add card: ', error);
-            throw new Error('Failed to add card');
+            console.log('Failed to add card');
         }
     }
 

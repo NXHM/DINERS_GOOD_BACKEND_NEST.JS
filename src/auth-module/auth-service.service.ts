@@ -26,7 +26,7 @@ export class AuthService {
                 !userDto.cards || 
                 !userDto.numberOfDocument || 
                 !userDto.phone) {
-                throw new Error('Not all the fields are completed');
+                console.log('Not all the fields are completed');
             }
 
 
@@ -34,14 +34,14 @@ export class AuthService {
             const validTypes = Object.values(TypesDocument);
   
             if(!validTypes.includes(userDto.typeOfDocument.toUpperCase() as TypesDocument)){
-                throw new Error('Invalid type of document');
+                console.log('Invalid type of document');
             } 
 
             
             if (userDto.password) {
                 const regex = /^(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
                 if (!regex.test(userDto.password)) {
-                    throw new Error("Password does not meet the minimum conditions required");
+                    console.log("Password does not meet the minimum conditions required");
                 }
             }
     
@@ -49,59 +49,59 @@ export class AuthService {
                 let emailValid = userDto.email;
                 let fields = emailValid.split('@');
                 if(fields.length !== 2){
-                    throw new Error("Invalid email");
+                    console.log("Invalid email");
                 }
                 const allowedDomains = ["hotmail.com", "gmail.com", "outlook.com"];
                 if(!allowedDomains.includes(fields[1])){
-                    throw new Error("Invalid email domain");
+                    console.log("Invalid email domain");
                 }
             }
     
             if(userDto.phone){
                 if(userDto.phone.length != 9){
-                    throw new Error("Invalid phone number");
+                    console.log("Invalid phone number");
                 }
             }
     
             if(userDto.numberOfDocument.length != 8){
-                throw new Error("Invalid document number");
+                console.log("Invalid document number");
             }
     
           
             const card = userDto.cards[0];
             if (card.cardNumber.length != 16) {
-                throw new Error("Invalid card number");
+                console.log("Invalid card number");
             }
             if (card.expirationDate) {
                 let csv = card.expirationDate;
                 let fields = csv.split('/');
                 if(fields.length !== 2){
-                    throw new Error("Invalid Date Format: Date should be in 'month/year' format");
+                    console.log("Invalid Date Format: Date should be in 'month/year' format");
                 }
                 if(parseInt(fields[0]) > 12){
-                    throw new Error("Invalid Date");
+                    console.log("Invalid Date");
                 }
             }
             if (!card.cardHolderName) {
-                throw new Error("Card holder name is required");
+                console.log("Card holder name is required");
             }
             if (!card.cardType) {
-                throw new Error("Card type is required");
+                console.log("Card type is required");
             }
             const validCardTypes = Object.values(TypesOfCard);
             if (!validCardTypes.includes(card.cardType.toUpperCase() as TypesOfCard)) {
-                throw new Error("Invalid card type");
+                console.log("Invalid card type");
             }
         
             if (card.securityCode.length != 3) {
-                throw new Error("Invalid security code");
+                console.log("Invalid security code");
             }
             /*const esValida = luhn.validate(card.cardNumber); 
             if(esValida){
-                throw new Error("Not a valid card number");
+                console.log("Not a valid card number");
             }*/
         } catch(error) {
-            throw new Error(error.message);
+            console.log(error.message);
         }
     }
 

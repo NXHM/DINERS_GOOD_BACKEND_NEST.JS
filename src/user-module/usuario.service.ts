@@ -18,17 +18,17 @@ export class UsuarioService {
 
     }
 
-    async getProfile(token: string): Promise<UserDto> {
+    async getProfile(token: string): Promise<UserDto | { error: string }> {
         try {
             const decodedToken = await this.jwtService.verifyAsync(token);
             const userId = decodedToken.sub;
             const user = await this.userRepository.findUserById(userId);
             if (!user) {
-                console.log('Invalid user');
+                return { error: 'Invalid user' };
             }
             return user;
         } catch (error) {
-            console.log('Invalid token');
+            return { error: 'Invalid token' };
         }
     }
 
@@ -38,42 +38,55 @@ export class UsuarioService {
             const userId = decodedToken.sub;
             const user = await this.userRepository.findUserById(userId);
             if (!user) {
-                console.log('Invalid user');
+                throw new Error('Invalid user');
             }
-            if (cardDto.cardNumber.length != 16) {
-                console.log("Invalid card number");
+            if (!cardDto.cash) {
+                throw new Error('Need cash to insert');
+            }
+
+            if (cardDto.cardNumber.length !== 16) {
+                throw new Error('Invalid card number');
             }
 
             if (cardDto.expirationDate) {
                 let fields = cardDto.expirationDate.split('/');
-                if (fields.length !== 2) {
-                    console.log("Invalid Date Format: Date should be in 'month/year' format");
+                if (fields.length !== 2 || !fields.every(field => /^[0-9]+$/.test(field))) {
+                    throw new Error("Invalid Date Format: Date should be in 'month/year' format");
                 }
-                if (parseInt(fields[0]) > 12) {
-                    console.log("Invalid Date");
+                
+                const month = parseInt(fields[0], 10);
+                const year = parseInt(fields[1], 10);
+
+                if (month < 1 || month > 12) {
+                    throw new Error("Invalid Date: Month should be between 1 and 12");
+                }
+            
+                const currentYear = new Date().getFullYear() % 100;
+                if (year < currentYear) {
+                throw new Error("Invalid Date: Year should be current or future");
                 }
             }
 
             if (!cardDto.cardHolderName) {
-                console.log("Card holder name is required");
+                throw new Error('Card holder name is required');
             }
 
             if (!cardDto.cardType) {
-                console.log("Card type is required");
+                throw new Error('Card type is required');
             }
 
             const validCardTypes = Object.values(TypesOfCard);
             if (!validCardTypes.includes(cardDto.cardType.toUpperCase() as TypesOfCard)) {
-                console.log("Invalid card type");
+                throw new Error('Invalid card type');
             }
 
-            if (cardDto.securityCode.length != 3) {
-                console.log("Invalid security code");
+            if (cardDto.securityCode.length !== 3 || !/^[0-9]+$/.test(cardDto.securityCode)) {
+                throw new Error('Invalid security code');
             }
 
             /*const esValida = luhn.validate(cardDto.cardNumber); 
             if(esValida){
-                console.log("Not a valid card number");
+                throw new Error('Not a valid card number');
             }*/
 
             const saltOrRounds: number = 10;
@@ -89,7 +102,7 @@ export class UsuarioService {
 
         } catch (error) {
             console.error('Failed to add card: ', error);
-            console.log('Failed to add card');
+            throw error;
         }
     }
 

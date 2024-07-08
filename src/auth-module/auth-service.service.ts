@@ -9,7 +9,6 @@ const luhn = require("luhn");
 
 @Injectable()
 export class AuthService {
-    private errores: any[] = [];
     private readonly userRepository: UserRepository;
    
 
@@ -19,6 +18,7 @@ export class AuthService {
     }
 
     async validationsForSignUp(userDto: UserDto) {
+        const errors: string[] = [];
         try {
             if (!userDto.password || 
                 !userDto.typeOfDocument || 
@@ -27,6 +27,7 @@ export class AuthService {
                 !userDto.numberOfDocument || 
                 !userDto.phone ) {
                 console.log('Not all the fields are completed');
+                errors.push('Not all the fields are completed');
             }
 
 
@@ -34,6 +35,7 @@ export class AuthService {
             const validTypes = Object.values(TypesDocument);
   
             if(!validTypes.includes(userDto.typeOfDocument.toUpperCase() as TypesDocument)){
+                errors.push('Invalid type of document');
                 console.log('Invalid type of document');
             } 
 
@@ -41,6 +43,7 @@ export class AuthService {
             if (userDto.password) {
                 const regex = /^(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
                 if (!regex.test(userDto.password)) {
+                    errors.push("Password does not meet the minimum conditions required");
                     console.log("Password does not meet the minimum conditions required");
                 }
             }
@@ -49,51 +52,62 @@ export class AuthService {
                 let emailValid = userDto.email;
                 let fields = emailValid.split('@');
                 if(fields.length !== 2){
+                    errors.push("Invalid email");
                     console.log("Invalid email");
                 }
                 const allowedDomains = ["hotmail.com", "gmail.com", "outlook.com"];
                 if(!allowedDomains.includes(fields[1])){
+                    errors.push("Invalid email domain");
                     console.log("Invalid email domain");
                 }
             }
     
             if(userDto.phone){
                 if(userDto.phone.length != 9){
+                    errors.push("Invalid phone number");
                     console.log("Invalid phone number");
                 }
             }
     
             if(userDto.numberOfDocument.length != 8){
+                errors.push("Invalid document number");
                 console.log("Invalid document number");
             }
     
           
             const card = userDto.cards[0];
             if (card.cardNumber.length != 16) {
+                errors.push("Invalid card number");
                 console.log("Invalid card number");
             }
             if (card.expirationDate) {
                 let csv = card.expirationDate;
                 let fields = csv.split('/');
                 if(fields.length !== 2){
+                    errors.push("Invalid Date Format: Date should be in 'month/year' format");
                     console.log("Invalid Date Format: Date should be in 'month/year' format");
                 }
                 if(parseInt(fields[0]) > 12){
+                    errors.push("Invalid Date");
                     console.log("Invalid Date");
                 }
             }
             if (!card.cardHolderName) {
+                errors.push("Card holder name is required");
                 console.log("Card holder name is required");
             }
             if (!card.cardType) {
+                errors.push("Card type is required");
                 console.log("Card type is required");
             }
             const validCardTypes = Object.values(TypesOfCard);
             if (!validCardTypes.includes(card.cardType.toUpperCase() as TypesOfCard)) {
+                errors.push("Invalid card type");
                 console.log("Invalid card type");
             }
         
             if (card.securityCode.length != 3) {
+                errors.push("Invalid security code");
                 console.log("Invalid security code");
             }
             /*const esValida = luhn.validate(card.cardNumber); 
@@ -104,14 +118,18 @@ export class AuthService {
         } catch(error) {
             console.log(error.message);
         }
+        return errors;
     }
 
-    async signUp(userDto: UserDto): Promise<UserDto> {
+    async signUp(userDto: UserDto):Promise<UserDto | { errors: string }> {
         try {
-            this.validationsForSignUp(userDto);
+            const validationErrors = await this.validationsForSignUp(userDto);
+            if (validationErrors.length > 0) {
+                return { errors: validationErrors[0] };
+            }
             const existingUser = await this.userRepository.findByUsername(userDto.username);
             if (existingUser) {
-                throw new Error('Username already exists');
+                return { errors: 'Username already exists' };
             }
             const saltOrRounds: number = 10;
             const hashPass = await bcrypt.hash(userDto.password, saltOrRounds);
@@ -129,19 +147,19 @@ export class AuthService {
             return userResult;
         } catch(error) {
             console.error('Failed to sign up user: ', error);
-            throw new Error(`Signup failed: ${error.message || error}`);
+            return error;
         }
     }
 
     
-    async signIn(username: string, password: string): Promise<{ accessToken: string }> {
+    async signIn(username: string, password: string): Promise<{ accessToken: string } | { error: string }> {
         const user = await this.userRepository.findOneWithUsernameAndPassword(username, password);
         if (!user) {
-          throw new Error('Invalid credentials');
+            return { error: 'Invalid credentials' };
         }
         const payload = { username: user.username, sub: user.id };
         if (!this.jwtService) {
-            throw new Error('JwtService is not properly injected');
+            return { error: 'JwtService is not properly injected' };
         }
         return {
             accessToken: await this.jwtService.signAsync(payload),

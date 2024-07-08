@@ -100,9 +100,7 @@ export class AuthService {
             if(esValida){
                 console.log("Not a valid card number");
             }*/
-            if (!card.cash){
-                card.cash = 10000;
-            }
+            
         } catch(error) {
             console.log(error.message);
         }
@@ -124,7 +122,9 @@ export class AuthService {
             userDto.cards[0].securityCode = await bcrypt.hash(userDto.cards[0].securityCode, saltOrRounds);
             userDto.cards[0].expirationDate = await bcrypt.hash(userDto.cards[0].expirationDate, saltOrRounds);
             userDto.cards[0].cardHolderName = await bcrypt.hash(userDto.cards[0].cardHolderName, saltOrRounds);
-
+            if (!userDto.cards[0].cash){
+                userDto.cards[0].cash = 10000;
+            }
             const userResult = await this.userRepository.saveUser(userDto);
             return userResult;
         } catch(error) {

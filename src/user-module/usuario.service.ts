@@ -71,6 +71,9 @@ export class UsuarioService {
                 console.log("Invalid security code");
             }
 
+            if(!cardDto.cash){
+                cardDto.cash = 10000;
+            }
             /*const esValida = luhn.validate(cardDto.cardNumber); 
             if(esValida){
                 console.log("Not a valid card number");

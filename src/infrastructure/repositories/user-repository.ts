@@ -43,8 +43,8 @@ export class UserRepository {
 
             for (const card of user.cards) {
                 const cardQuery = `
-                    INSERT INTO cards (user_id, cardNumber, fourDigitCardNumber,expiration_date, cardHolderName, cardType, securityCode)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    INSERT INTO cards (user_id, cardNumber, fourDigitCardNumber,expiration_date, cardHolderName, cardType, securityCode, cash)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                     RETURNING *;    
                 `;
                 const valuesCard = [
@@ -54,7 +54,8 @@ export class UserRepository {
                     card.expirationDate,
                     card.cardHolderName,
                     card.cardType,
-                    card.securityCode
+                    card.securityCode,
+                    card.cash
                 ];
                 const cardResult = await this.dinersGoodPool.query(cardQuery, valuesCard);
                 newUser.cards.push(cardResult.rows[0]);

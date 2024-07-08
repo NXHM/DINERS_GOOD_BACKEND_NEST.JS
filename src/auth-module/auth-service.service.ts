@@ -9,7 +9,7 @@ const luhn = require("luhn");
 
 @Injectable()
 export class AuthService {
-
+    private errores: any[] = [];
     private readonly userRepository: UserRepository;
    
 
@@ -25,7 +25,7 @@ export class AuthService {
                 !userDto.email || 
                 !userDto.cards || 
                 !userDto.numberOfDocument || 
-                !userDto.phone) {
+                !userDto.phone ) {
                 console.log('Not all the fields are completed');
             }
 
@@ -100,6 +100,9 @@ export class AuthService {
             if(esValida){
                 console.log("Not a valid card number");
             }*/
+            if (!card.cash){
+                card.cash = 10000;
+            }
         } catch(error) {
             console.log(error.message);
         }
@@ -121,7 +124,6 @@ export class AuthService {
             userDto.cards[0].securityCode = await bcrypt.hash(userDto.cards[0].securityCode, saltOrRounds);
             userDto.cards[0].expirationDate = await bcrypt.hash(userDto.cards[0].expirationDate, saltOrRounds);
             userDto.cards[0].cardHolderName = await bcrypt.hash(userDto.cards[0].cardHolderName, saltOrRounds);
-
 
             const userResult = await this.userRepository.saveUser(userDto);
             return userResult;

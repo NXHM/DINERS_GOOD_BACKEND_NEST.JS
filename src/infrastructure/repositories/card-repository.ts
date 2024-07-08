@@ -24,7 +24,7 @@ export class CardRepository {
        
         try {
             const result = await this.dinersGoodPool.query(query, value);
-            const cards: CardDto[] = result.rows.map((row: { id: number; cardnumber: string; fourdigitcardnumber: string; expiration_date: string; cardholdername: string; cardtype: TypesOfCard; securitycode: string; }) => {
+            const cards: CardDto[] = result.rows.map((row: { id: number; cardnumber: string; fourdigitcardnumber: string; expiration_date: string; cardholdername: string; cardtype: TypesOfCard; securitycode: string; cash: number; }) => {
                 const cardDto = new CardDto();
                 cardDto.id = row.id;
                 cardDto.cardNumber = row.cardnumber;
@@ -33,6 +33,7 @@ export class CardRepository {
                 cardDto.cardHolderName = row.cardholdername;
                 cardDto.cardType = row.cardtype;
                 cardDto.securityCode = row.securitycode;
+                cardDto.cash = row.cash;
                 return cardDto;
             });
             return cards;
@@ -44,8 +45,8 @@ export class CardRepository {
     
     async addCardForUser(userId: number, cardDto: CardDto): Promise<CardDto> {
         const query = `
-            INSERT INTO cards (user_id, cardnumber, fourDigitCardNumber, expiration_date, cardholdername, cardtype, securitycode)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO cards (user_id, cardnumber, fourDigitCardNumber, expiration_date, cardholdername, cardtype, securitycode, cash)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING *;
         `;
 
@@ -56,7 +57,8 @@ export class CardRepository {
             cardDto.expirationDate,
             cardDto.cardHolderName,
             cardDto.cardType,
-            cardDto.securityCode
+            cardDto.securityCode,
+            cardDto.cash,
         ];
 
     
@@ -71,6 +73,7 @@ export class CardRepository {
             insertedCard.cardHolderName = row.cardholdername;
             insertedCard.cardType = row.cardtype;
             insertedCard.securityCode = row.securitycode;
+            insertedCard.cash = row.cash;
     
             console.log('Card added successfully');
             return insertedCard;

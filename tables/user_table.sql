@@ -18,5 +18,6 @@ CREATE TABLE cards (
     expiration_date VARCHAR(255) NOT NULL,
     cardHolderName VARCHAR(255) NOT NULL,
     cardType VARCHAR(255) NOT NULL,
-    securityCode VARCHAR(255) NOT NULL
+    securityCode VARCHAR(255) NOT NULL,
+    cash INT NOT NULL
 );

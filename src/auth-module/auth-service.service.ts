@@ -38,7 +38,11 @@ export class AuthService {
                 errors.push('Invalid type of document');
                 console.log('Invalid type of document');
             } 
-
+            
+            if(!userDto.username){
+                errors.push('Username is required');
+                console.log('Username is required');
+            }
             
             if (userDto.password) {
                 const regex = /^(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
